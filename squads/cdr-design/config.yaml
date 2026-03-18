@@ -1,0 +1,223 @@
+## ============================================================================
+## CDR DESIGN SQUAD - Configuration
+## ============================================================================
+## Squad de design e conteudo visual para Instagram da CDR Group
+## Cria posts, carrosseis, stories, reels covers e identidade visual
+## ============================================================================
+
+name: cdr-design
+title: "CDR Design"
+version: "1.1.0"
+author: "Ivan Furtado / CDR Group"
+description: >
+  Squad de design e conteudo visual para o Instagram da CDR Group.
+  Baseado em 9 mentes elite de design, branding, tipografia, copywriting
+  e estrategia de social media. Cria feed posts, carrosseis, stories,
+  reels covers e gerencia identidade visual da marca.
+
+## Slash command prefix for Claude Code
+slash_prefix: "cdrDesign"
+pattern_prefix: "CD"
+
+## Entry agent (orchestrator principal)
+entry_agent: "cdr-design-chief"
+
+## Target audience
+target_user: "Equipe CDR Group"
+
+## Use cases
+use_cases:
+  - id: UC1
+    name: "Feed Posts + Carrosseis"
+    description: "Posts estaticos e carrosseis educativos/promocionais"
+  - id: UC2
+    name: "Stories + Reels Covers"
+    description: "Artes para stories, capas de reels e destaques"
+  - id: UC3
+    name: "Identidade Visual / Branding"
+    description: "Paleta de cores, tipografia, diretrizes visuais"
+  - id: UC4
+    name: "Copies Visuais"
+    description: "Texto persuasivo integrado ao design (legendas + arte)"
+
+## Brand identity (extracted from CDR Instagram)
+brand:
+  primary_color: "#A8D600"
+  background: "#0A0A0A"
+  accent: "#B5E300"
+  logo: "Seta verde apontando para cima-direita em circulo escuro"
+  typography: "Sans-serif limpa, bold para headlines"
+  style: "Dark theme, green neon/glow, tech/moderno"
+
+## Reference agencies (design patterns to model)
+references:
+  - handle: "@lever.ecomm"
+    patterns:
+      - "Bold typography"
+      - "Brand name repetition as design element"
+      - "High-energy sales-driven aesthetic"
+      - "Clean graphic overlays on videos"
+  - handle: "@hausperformance"
+    patterns:
+      - "Editorial/magazine design style"
+      - "Header bar branding across carousels"
+      - "Content-rich carousels"
+      - "Bold condensed typography on photos"
+
+## Tier structure
+tiers:
+  orchestrator:
+    - cdr-design-chief
+  tier_0:
+    - alina-wheeler
+  tier_1:
+    - marty-neumeier
+    - chris-do
+    - ellen-lupton
+  tier_2:
+    - robin-williams
+    - eugene-schwartz
+    - donald-miller
+  tier_3:
+    - jasmine-star
+    - gary-vaynerchuk
+
+## Tasks
+tasks:
+  - start
+  - diagnose-brand
+  - create-brand-guidelines
+  - create-feed-post
+  - create-carousel
+  - create-stories-kit
+  - create-reels-cover
+  - plan-content-calendar
+  - review-visual-quality
+  - write-caption
+  - define-content-mix
+  - create-highlight-covers
+  - generate-image
+
+## Workflows
+workflows:
+  - brand-identity-workflow
+  - content-creation-workflow
+  - weekly-planning-workflow
+
+## Quality gates
+quality_gates:
+  - id: QG-001
+    name: "Request Classification"
+    transition: "Input -> Tier correto"
+    type: routing
+    blocking: false
+  - id: QG-002
+    name: "Brand Context Set"
+    transition: "Sem marca -> Diagnostico Wheeler"
+    type: blocking
+    blocking: true
+  - id: QG-003
+    name: "Design Brief Approved"
+    transition: "Briefing -> Criacao"
+    type: blocking
+    blocking: true
+  - id: QG-004
+    name: "CRAP Visual Check"
+    transition: "Peca criada -> Robin Williams review"
+    type: blocking
+    blocking: true
+  - id: QG-005
+    name: "Copy Review"
+    transition: "Texto criado -> Schwartz/Miller review"
+    type: advisory
+    blocking: false
+  - id: QG-006
+    name: "Final Delivery"
+    transition: "Output -> Entrega"
+    type: blocking
+    blocking: true
+
+## Pattern library
+pattern_library:
+  prefix: CD
+  naming_convention:
+    format: "{PREFIX}-{CATEGORY}-{NUMBER}"
+    example: "CD-TP-001"
+  categories:
+    - id: TP
+      name: "Task Patterns"
+    - id: EP
+      name: "Executor Patterns"
+    - id: PP
+      name: "Process Patterns"
+    - id: DP
+      name: "Design Patterns"
+    - id: CP
+      name: "Content Patterns"
+  patterns: []
+
+## Task standards
+task_standards:
+  enforce_anatomy: true
+  validator: "CD-TP-001"
+  required_fields:
+    - task_name
+    - status
+    - responsible_executor
+    - execution_type
+    - input
+    - output
+    - action_items
+    - acceptance_criteria
+
+## Workflow configuration
+workflow_config:
+  checkpoint_policy: always_active
+  fail_fast: true
+  allow_manual_override: false
+
+## Image Generation (Nano Banana / Gemini API)
+image_generation:
+  enabled: true
+  default_model: "gemini-3-pro-image-preview"
+  fallback_model: "gemini-3.1-flash-image-preview"
+  output_dir: "output/"
+  script: "scripts/generate-image.mjs"
+  env_key: "GEMINI_API_KEY"
+
+## Dependencies
+dependencies:
+  optional:
+    - squad-creator
+
+## Research foundation
+research:
+  minds_count: 9
+  minds:
+    - name: "Alina Wheeler"
+      tier: 0
+      frameworks: ["5 Fases de Brand Identity", "Mantra de Diagnostico"]
+    - name: "Marty Neumeier"
+      tier: 1
+      frameworks: ["5 Disciplinas do Branding", "Teste Onlyness", "Brand Commitment Matrix"]
+    - name: "Chris Do"
+      tier: 1
+      frameworks: ["Brand Personality Pyramid", "3 Pilares de Branding"]
+    - name: "Ellen Lupton"
+      tier: 1
+      frameworks: ["Framework Tripartido Letter-Text-Grid", "Hierarquia Tipografica"]
+    - name: "Robin Williams"
+      tier: 2
+      frameworks: ["CRAP Principles", "Contraste Tipografico"]
+    - name: "Eugene Schwartz"
+      tier: 2
+      frameworks: ["5 Niveis de Consciencia", "Canalizacao de Desejo em Massa"]
+    - name: "Donald Miller"
+      tier: 2
+      frameworks: ["SB7 StoryBrand Framework", "BrandScript"]
+    - name: "Jasmine Star"
+      tier: 3
+      frameworks: ["9-12 Categorias de Conteudo", "Regra 98/2", "Planejamento 40min/semana"]
+    - name: "Gary Vaynerchuk"
+      tier: 3
+      frameworks: ["Jab Jab Jab Right Hook", "Document Don't Create", "Platform-Native Content"]

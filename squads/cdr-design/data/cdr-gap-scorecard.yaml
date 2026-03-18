@@ -1,0 +1,111 @@
+brand_gap_audit:
+  brand_name: "CDR Group"
+  audit_date: "2026-03-07"
+  analyst: "Marty Neumeier (Brand Gap Analysis)"
+  version: "3.0"
+
+  strategy_documented:
+    positioning: "Socio estrategico de performance para e-commerces que levam o jogo a serio"
+    mission: "Ser o socio estrategico que pensa junto com o cliente e entrega resultado validado na pratica"
+    vision: "Maior assessoria de performance para e-commerce do Brasil com cultura forte e equipe de elite"
+    values:
+      - "Verdade Radical — transparencia mesmo quando doi"
+      - "Respeito Mutuo — relacao de igual pra igual"
+      - "Sangue no Olho — so aceita quem quer crescer de verdade"
+    promise: "Resultado real validado no campo de batalha, construido junto com o cliente, com skin in the game"
+    target: "Jovens empreendedores de e-commerce (23-35 anos), faturamento 100-300k/mes, atitude de dedicacao"
+    formula: "C + D = R (Constancia + Dados = Resultado)"
+    onlyness: "A UNICA assessoria que validou toda estrategia na propria operacao, cobra comissao sobre resultado, e pensa junto com o cliente"
+
+  gaps_identified:
+    - category: "Estrategia vs Visual"
+      strategy_says: "Autoridade silenciosa premium (Apple-like)"
+      experience_delivers: "Estetica gamer/tech com HUD frames, glow neon, scan lines"
+      gap_severity: 5
+      evidence: "Fundador classifica posts atuais como HORRIVEIS"
+      status: "Bridge plan definido — nova direcao visual baseada em @design.descomplicado"
+
+    - category: "Posicionamento vs Comunicacao"
+      strategy_says: "Socio estrategico que pensa junto"
+      experience_delivers: "Posts genericos sobre trafego pago sem diferenciacao"
+      gap_severity: 4
+      evidence: "Nenhum post comunica onlyness, inimigo, ou formula C+D=R"
+      status: "Bridge plan definido — pilares de conteudo mapeados"
+
+    - category: "Premium vs Preco"
+      strategy_says: "Pagam caro sem reclamar porque sabem que e bom"
+      experience_delivers: "Nenhum elemento visual/verbal reforça premiumizacao"
+      gap_severity: 3
+      evidence: "Site e Instagram nao comunicam exclusividade"
+      status: "Bridge plan definido — novo brandbook com direcao premium"
+
+    - category: "Marca Pessoal vs Marca Corporativa"
+      strategy_says: "CDR como entidade independente do fundador"
+      experience_delivers: "Clientes compram o Ivan, nao a CDR"
+      gap_severity: 3
+      evidence: "Grande parte dos leads vem pelo Instagram pessoal do Ivan"
+      status: "Bridge plan parcial — bastidores da equipe no feed CDR"
+
+    - category: "Skin in the Game vs Comunicacao"
+      strategy_says: "Fee fixo + comissao = incentivos alinhados"
+      experience_delivers: "Modelo nao e comunicado como diferencial"
+      gap_severity: 2
+      evidence: "Nenhum post ou secao do site destaca o modelo de remuneracao"
+      status: "Bridge plan definido — integrar na narrativa de marca"
+
+  overall_gap_score: 3.4
+
+  bridge_plan:
+    priority_1:
+      gap: "Estrategia vs Visual"
+      action: "Implementar brandbook v3 com estetica @design.descomplicado adaptada"
+      owner: "Equipe de Design CDR"
+      timeline: "Imediato — proximo post"
+      tools:
+        - "Brandbook v3 como guia"
+        - "Templates de referencia"
+        - "Checklist pre-publicacao"
+
+    priority_2:
+      gap: "Posicionamento vs Comunicacao"
+      action: "Criar calendiario de conteudo baseado em C+D=R + inimigo definido"
+      owner: "Ivan + Equipe de Conteudo"
+      timeline: "1-2 semanas"
+      tools:
+        - "Pilares de conteudo do brandbook"
+        - "Frases de marca definidas"
+        - "Blacklist de linguagem"
+
+    priority_3:
+      gap: "Marca Pessoal vs Corporativa"
+      action: "Aumentar conteudo de bastidores da equipe no Instagram CDR"
+      owner: "Ivan + Equipe"
+      timeline: "1 mes"
+      tools:
+        - "Template de bastidores (foto + overlay)"
+        - "Apresentacao dos membros da equipe"
+
+    priority_4:
+      gap: "Skin in the Game vs Comunicacao"
+      action: "Integrar modelo fee+comissao na narrativa de diferenciacao"
+      owner: "Ivan"
+      timeline: "2 semanas"
+      tools:
+        - "Posts educativos sobre o modelo"
+        - "Secao no site sobre como funciona"
+
+  validation_metrics:
+    - metric: "Reacao visceral ao feed"
+      baseline: "HORRIVEL (palavras do fundador)"
+      target: "FODA! (reacao desejada)"
+      measurement: "Feedback do fundador + engajamento"
+
+    - metric: "Consistencia visual do feed"
+      baseline: "Baixa (designer junior sem guia claro)"
+      target: "Todo post reconhecivel como CDR em 1 segundo"
+      measurement: "Aderencia ao checklist pre-publicacao"
+
+    - metric: "Leads via Instagram CDR (vs pessoal do Ivan)"
+      baseline: "Maioria via perfil pessoal"
+      target: "50/50 entre pessoal e CDR"
+      measurement: "Origem dos leads no CRM"

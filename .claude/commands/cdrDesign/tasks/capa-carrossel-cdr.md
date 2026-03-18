@@ -1,0 +1,1 @@
+Read squads/cdr-design/agents/cdr-design-chief.md to load the CDR Design Chief, then read squads/cdr-design/tasks/capa-carrossel-cdr.md and execute this task following all steps exactly as written. The script at squads/cdr-design/scripts/create-post.mjs MUST be executed as-is — do NOT modify it or replicate its logic manually. $ARGUMENTS

@@ -1,0 +1,17 @@
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# Output files (generated)
+squads/cdr-design/output/*.json
+squads/cdr-design/output/*.png
+squads/cdr-design/output/*.html
+!squads/cdr-design/output/serve.mjs
+
+# Instagram research (private data)
+squads/cdr-design/data/instagram-research/
+
+# Claude Code local settings
+.claude/settings.local.json

@@ -1,0 +1,130 @@
+# Tool Registry — CDR Design Squad
+# Registro formal de todas as ferramentas e integracoes externas
+# Version: 1.0.0
+
+tools:
+  # ─── Image Generation ───────────────────────────────────────────
+  - name: "Gemini API (Nano Banana)"
+    id: "gemini-api"
+    category: "image_generation"
+    service: "Google Cloud"
+    models:
+      primary: "gemini-3.1-flash-image-preview"
+      fallback: "gemini-2.5-flash-image"
+      premium: "gemini-3-pro-image-preview"
+    purpose: "Gerar backgrounds criativos e elementos visuais para posts"
+    env_key: "GEMINI_API_KEY"
+    script: "scripts/generate-image.mjs"
+    status: "active"
+    error_handling:
+      timeout: "Auto-fallback para modelo flash"
+      quota_exceeded: "Aguardar 24h ou verificar Google Cloud Console"
+      invalid_key: "Verificar GEMINI_API_KEY no .env"
+
+  # ─── Browser Automation ─────────────────────────────────────────
+  - name: "Playwright"
+    id: "playwright"
+    category: "rendering"
+    version: "1.40+"
+    purpose: "Renderizar HTML/CSS premium para PNG 1080x1080 pixel-perfect"
+    script: "scripts/render-post.mjs"
+    status: "active"
+    setup: "npx playwright install chromium"
+    error_handling:
+      chromium_missing: "Executar: npx playwright install chromium"
+      screenshot_fail: "Verificar HTML syntax e output dir permissions"
+      timeout: "Aumentar timeout no script (default 30s)"
+
+  # ─── Social Media Scraping ─────────────────────────────────────
+  - name: "Apify Instagram Scraper"
+    id: "apify-instagram"
+    category: "data_collection"
+    service: "Apify"
+    actor: "apify/instagram-profile-scraper"
+    purpose: "Scraping de perfis Instagram para pesquisa de concorrentes e referencias"
+    env_key: "APIFY_TOKEN"
+    script: "scripts/scrape-instagram.mjs"
+    status: "active"
+    output_dir: "data/instagram-research/"
+    error_handling:
+      invalid_token: "Verificar APIFY_TOKEN no .env"
+      actor_unavailable: "Verificar status do ator no dashboard Apify"
+      rate_limit: "Aguardar 1h entre scrapes do mesmo perfil"
+
+scripts:
+  # ─── Render Engine ──────────────────────────────────────────────
+  - name: "render-post.mjs"
+    id: "render-engine"
+    category: "image_rendering"
+    purpose: "Pipeline completo: JSON config → HTML/CSS → Playwright screenshot → PNG"
+    location: "scripts/render-post.mjs"
+    lines: "~1500"
+    inputs:
+      - "JSON config (texto, cores, template, bullets)"
+    outputs:
+      - "PNG 1080x1080 (feed) ou 1080x1920 (stories)"
+    dependencies:
+      - "playwright"
+    features:
+      - "8 templates (editorial, composite, bold-statement, data-metrics, split, etc.)"
+      - "Device frames premium (iPhone 15 Pro, MacBook Pro)"
+      - "Glassmorphism Apple HIG (blur 20px, saturate 180%)"
+      - "Dynamic Island, sombras 3D, screen glare diagonal"
+
+  # ─── Image Generator ────────────────────────────────────────────
+  - name: "generate-image.mjs"
+    id: "image-generator"
+    category: "image_generation"
+    purpose: "Wrapper para Gemini API — gera backgrounds criativos"
+    location: "scripts/generate-image.mjs"
+    inputs:
+      - "Prompt de geracao + parametros de estilo"
+    outputs:
+      - "PNG background para composicao"
+    dependencies:
+      - "gemini-api"
+
+  # ─── Instagram Scraper ──────────────────────────────────────────
+  - name: "scrape-instagram.mjs"
+    id: "instagram-scraper"
+    category: "data_collection"
+    purpose: "Scraping de perfil Instagram via Apify para analise de concorrentes"
+    location: "scripts/scrape-instagram.mjs"
+    usage: "node scripts/scrape-instagram.mjs --profile <username> [--limit N] [--download]"
+    inputs:
+      - "Instagram handle"
+    outputs:
+      - "data/instagram-research/<username>-feed.json"
+      - "data/instagram-research/<username>-analysis.md"
+      - "data/instagram-research/<username>-images/ (com --download)"
+    dependencies:
+      - "apify-instagram"
+
+  # ─── Local Dev Server ───────────────────────────────────────────
+  - name: "serve.mjs"
+    id: "local-server"
+    category: "development"
+    purpose: "Servidor local para preview de outputs renderizados"
+    location: "output/serve.mjs"
+    port: 3457
+    inputs: []
+    outputs:
+      - "HTTP server em localhost:3457"
+    dependencies: []
+
+integration_map:
+  render_pipeline:
+    flow: "JSON config → render-post.mjs → Playwright → PNG"
+    tools: ["render-engine", "playwright"]
+
+  image_generation_pipeline:
+    flow: "Prompt → generate-image.mjs → Gemini API → PNG background"
+    tools: ["image-generator", "gemini-api"]
+
+  research_pipeline:
+    flow: "Handle → scrape-instagram.mjs → Apify → JSON + Analysis"
+    tools: ["instagram-scraper", "apify-instagram"]
+
+  full_content_pipeline:
+    flow: "Brief → [Generate BG] → [Build JSON] → Render → PNG"
+    tools: ["gemini-api", "image-generator", "render-engine", "playwright"]
