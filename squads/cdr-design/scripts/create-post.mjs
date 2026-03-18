@@ -153,6 +153,10 @@ const detectedEmojis = detectEmojis(textInput);
 // --- Build prompt ---
 const lineDescriptions = lines.map((l, i) => `  Line ${i + 1}: ${l}`).join('\n');
 
+// Build allowed words list (only the user's text + fixed layout elements)
+const userWords = lines.flatMap(l => l.replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/).filter(Boolean));
+const allowedWordsList = [...new Set(userWords)].join(', ');
+
 const styleBlock = `STYLE TO COPY EXACTLY:
 - CONDENSED angular bold font (Impact/Dharma Gothic style — tall, narrow, sharp corners, NOT rounded or bubbly)
 - THICK dark green outline/stroke (4-6px) around every letter
@@ -209,7 +213,13 @@ CRITICAL SAFE ZONE RULES — Instagram will center-crop this to a SQUARE on the 
 UNIFORM WIDTH RULE — THIS IS THE MOST IMPORTANT RULE:
 Every single line of text MUST span the EXACT SAME horizontal width (approximately 95% of the card width). If one line has fewer characters (e.g. "CASE" vs "NOSSO"), you MUST increase that line's font-size/letter-spacing/horizontal scale so it stretches to match the width of the other lines. Think of it like a justified text block where every line is stretched to the same left-right edges. NO line should appear narrower than any other line. This is NON-NEGOTIABLE.
 
-IMPORTANT: Generate at exactly 1080x1920 pixels. Imagine the reference image placed in the center of a taller canvas with matching gradient extending above and below.${emojiBlock}${logoBlock}`
+IMPORTANT: Generate at exactly 1080x1920 pixels. Imagine the reference image placed in the center of a taller canvas with matching gradient extending above and below.
+
+FINAL REMINDER — DO NOT COPY TEXT FROM REFERENCE:
+The reference image contains text that is NOT your target. ANY word visible in the reference image that does not appear in this allowed list MUST NOT be reproduced.
+ALLOWED WORDS (the ONLY words that may appear as main text): ${allowedWordsList}
+ALLOWED LAYOUT ELEMENTS (small, fixed): @cdrgroup.assessoria, C (in circle), CONTEÚDO AO LADO (with arrow)
+Everything else visible in the reference is FORBIDDEN. If your output contains ANY word not listed above, the image is WRONG.${emojiBlock}${logoBlock}`
   : `Look at this reference image. Copy ONLY the visual style (font, colors, shadows, gradient, grain, layout). The text in the reference image is IRRELEVANT — COMPLETELY IGNORE any words/letters visible in the reference. Generate ONLY the text I specify below. If the image you generate contains ANY word not listed below, it is WRONG.
 
 ${styleBlock}
@@ -232,7 +242,13 @@ Per-line sizing is CRITICAL: each line must fill the same 95% width regardless o
 UNIFORM WIDTH RULE — THIS IS THE MOST IMPORTANT RULE:
 Every single line of text MUST span the EXACT SAME horizontal width (approximately 95% of the card width). If one line has fewer characters (e.g. "CASE" vs "NOSSO"), you MUST increase that line's font-size/letter-spacing/horizontal scale so it stretches to match the width of the other lines. Think of it like a justified text block where every line is stretched to the same left-right edges. NO line should appear narrower than any other line. This is NON-NEGOTIABLE.
 
-IMPORTANT: Generate at 1080x1350 pixels (portrait Instagram 4:5) aspect ratio.${emojiBlock}${logoBlock}`;
+IMPORTANT: Generate at 1080x1350 pixels (portrait Instagram 4:5) aspect ratio.
+
+FINAL REMINDER — DO NOT COPY TEXT FROM REFERENCE:
+The reference image contains text that is NOT your target. ANY word visible in the reference image that does not appear in this allowed list MUST NOT be reproduced.
+ALLOWED WORDS (the ONLY words that may appear as main text): ${allowedWordsList}
+ALLOWED LAYOUT ELEMENTS (small, fixed): @cdrgroup.assessoria, C (in circle), CONTEÚDO AO LADO (with arrow)
+Everything else visible in the reference is FORBIDDEN. If your output contains ANY word not listed above, the image is WRONG.${emojiBlock}${logoBlock}`;
 
 // --- Grain generator (inline) ---
 function generateGrainBuffer(width, height, intensity, warmthVal) {
