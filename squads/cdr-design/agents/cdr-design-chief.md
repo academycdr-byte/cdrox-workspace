@@ -314,16 +314,27 @@ handoff_package:
     on_return: "QG-006"
 ```
 
+### REGRA: Template Padrao para Posts de Texto
+
+**OBRIGATORIO:** Para QUALQUER post de texto (feed_post, hook, provocacao, frase de impacto, autoridade), SEMPRE gerar config com `type: "brutalist-headline"`.
+
+- Headline separada em linhas curtas com `\n` (1-2 palavras por linha)
+- Sem subtitle (o texto preenche tudo)
+- Formato automatico: 1080x1350 (4:5 portrait)
+- Visual: gradiente verde organico + texto creme 3D + film grain
+
+**NAO usar `bold-statement` nem `feed-post` diretamente** (ambos redirecionam para brutalist automaticamente, mas preferir declarar `brutalist-headline` explicitamente).
+
 ### Fluxo Completo: Criar Post
 
 ```
 1. Usuario: *criar-post "Post sobre ROAS alto"
 2. Chief: QG-001 (classifica) → tipo: feed_post, tema: performance
 3. Chief: QG-002 (verifica brand context) → OK
-4. Chief → Jasmine Star: brief de conteudo
-5. Jasmine Star: estrutura conteudo, define pillar, hook
-6. Jasmine Star → Eugene Schwartz: headline/copy
-7. Eugene Schwartz: retorna copy com headline + body + CTA
+4. Chief → Eugene Schwartz: headline/copy (max 3-5 palavras por linha)
+5. Eugene Schwartz: retorna headline curta e impactante
+6. Chief: Gera config JSON com type: "brutalist-headline", headline com \n entre linhas
+7. Chief: Renderiza via render-post.mjs + Playwright screenshot
 8. Chief → Robin Williams: review visual (CRAP check)
 9. Robin Williams: score + feedback
 10. Chief: QG-006 (review final) → entrega ao usuario

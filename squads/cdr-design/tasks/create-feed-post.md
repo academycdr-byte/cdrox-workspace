@@ -94,32 +94,39 @@ copy_creation:
 **Executor:** ellen-lupton
 **Action:** Especificar design do post
 
+**REGRA:** Para posts de texto (grafico, texto_puro), SEMPRE usar template `brutalist-headline`.
+O texto deve preencher toda a area visual. Separar headline em linhas curtas com `\n`.
+
 ```yaml
 design_specs:
-  format: "{format}"
-  background: "#0A0A0A"
+  template: "brutalist-headline"
+  format: "1080x1350 (4:5 portrait)"
+  background: "Gradiente verde organico (blobs radiais)"
 
   typography:
-    headline: "Sans-serif Bold/Black, 56-72px, #FFFFFF"
-    subline: "Sans-serif Medium, 28-36px, #B0B0B0"
-    accent_text: "Sans-serif Bold, #A8D600"
+    headline: "Luckiest Guy, tamanho DINAMICO (calculado por linha), #F2E2C4 (creme)"
+    extrusion_3d: "Verde (#7CB800) degradando para preto, 21 camadas de text-shadow"
+    stroke: "8px #0E0C06 (outline escuro)"
 
   layout:
-    margins: "60px em todos os lados"
-    headline_position: "Centro ou topo"
-    logo_position: "Canto inferior direito"
-    cta_position: "Inferior, destaque"
+    text_fill: "Texto deve preencher 85-95% da largura, uma palavra por linha"
+    headline_position: "Centro vertical (translateY -48%)"
+    handle_position: "Topo esquerdo"
+    logo_position: "Topo direito (circulo com C)"
+    cta_position: "Inferior esquerdo (CONTEUDO AO LADO →)"
 
   elements:
-    logo: "CDR seta verde, tamanho discreto"
-    divider: "Linha #A8D600, 2px"
-    glow: "Efeito neon verde sutil atras de keywords"
-    overlay: "IF foto: overlay preto 60-70% opacidade"
+    vignette: "Box-shadow inset com 3 camadas"
+    corner_darkening: "4 gradientes radiais nos cantos"
+    film_grain: "3 canvas layers (overlay + soft-light + multiply)"
+    card_border: "Border-radius 26px + inner border shadow"
 
-  grid:
-    columns: 4
-    gutter: 20px
-    safe_area: "60px de margem"
+  config_example: |
+    {
+      "type": "brutalist-headline",
+      "headline": "HEADLINE\nEM LINHAS\nCURTAS",
+      "prefix": "post-nome-descritivo"
+    }
 ```
 
 ### Step 4: CRAP Review (Robin Williams)

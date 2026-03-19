@@ -132,6 +132,38 @@ Este squad opera na intersecao de design visual, branding, copywriting e estrate
 - Cor verde CDR como destaque
 - Consistencia com a estetica da pagina
 
+## REGRA OBRIGATORIA: Template Padrao para Posts de Texto
+
+**Para QUALQUER post dominado por texto (headline, frase de impacto, hook, provocacao):**
+
+- **SEMPRE usar `type: "brutalist-headline"`** no config JSON
+- O texto deve PREENCHER toda a area visual (sem espacos vazios grandes)
+- Font sizing e DINAMICO (calculado por linha para ocupar a largura inteira)
+- Visual: fundo gradiente verde organico + texto creme com extrusao 3D verde + film grain
+- Fonte: Luckiest Guy (uppercase, block letters)
+- Formato: 1080x1350 (4:5 portrait, ocupa mais espaco no feed)
+- Separar headline em `\n` (uma palavra ou grupo curto por linha)
+- Emojis inline sao permitidos no final da ultima linha
+
+**Configs `bold-statement` e `feed-post` sao automaticamente redirecionados para `brutalist-headline`.**
+
+**Templates que NAO usam brutalist (tem estrutura propria):**
+- `composite` (mockups de device)
+- `checklist` (listas)
+- `data-metrics` (numeros e KPIs)
+- `hud-dashboard` / `hud-composite` (dashboards)
+- `comparison` (lado a lado)
+- `stories` (formato vertical 9:16)
+
+**Exemplo de config correto:**
+```json
+{
+  "type": "brutalist-headline",
+  "headline": "ELE\nQUASE\nQUEBROU",
+  "prefix": "post-ele-quase-quebrou"
+}
+```
+
 ## Anti-Patterns (O Que Evitar)
 
 1. **Cores fora da paleta** — Nunca usar cores que conflitem com verde/preto CDR
@@ -142,6 +174,7 @@ Este squad opera na intersecao de design visual, branding, copywriting e estrate
 6. **Inconsistencia visual** — Posts com estilos diferentes parecem amadores
 7. **Copiar ao inves de canalizar** — Nao copiar exatamente a Lever/Haus; usar como inspiracao com identidade propria CDR
 8. **JAMAIS usar travessoes na copy** — Nem "—" (em dash) nem "-" (hifen como separador de frases). Substituir por ponto final, virgula ou reescrever. Ex: "Design mobile-first para 70% do trafego" em vez de "Design mobile-first — 70% do trafego"
+9. **JAMAIS usar bold-statement ou feed-post para posts de texto** — Usar SEMPRE brutalist-headline. Os templates antigos geram texto pequeno com muito espaco vazio
 
 ## Regras de Auto-Composicao Visual
 

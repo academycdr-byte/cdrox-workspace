@@ -2916,12 +2916,12 @@ const TEMPLATE_MAP = {
   'editorial': editorialPost,
   'composite': compositePost,
   'split': splitPost,
-  'bold-statement': boldStatementPost,
+  'bold-statement': brutalistHeadlinePost,   // PADRAO: redireciona para brutalist (texto preenche tudo)
   'checklist': checklistPost,
   'data-metrics': dataMetricsPost,
   'ticker-brand': tickerBrandPost,
   'photo-overlay': photoOverlayPost,
-  'feed-post': feedPost,
+  'feed-post': brutalistHeadlinePost,        // PADRAO: redireciona para brutalist (texto preenche tudo)
   'stories': storiesPost,
   'hud-dashboard': hudDashboardPost,
   'hud-composite': hudCompositePost,
