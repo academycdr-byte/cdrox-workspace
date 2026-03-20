@@ -23,7 +23,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // --- Config ---
 const API_KEY = process.env.GEMINI_API_KEY;
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-3-pro-image-preview';
+const MODEL_CHAIN = [
+  'gemini-3-pro-image-preview',
+  'gemini-3.1-flash-image-preview',
+  'gemini-2.5-flash-image',
+];
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || '';
 
 // --- Parse args ---
 const args = process.argv.slice(2);
@@ -117,52 +122,68 @@ for (const refImage of refImages) {
 
 parts.push({ text: fullPrompt });
 
-const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
+const requestBody = JSON.stringify({
+  contents: [{ parts }],
+  generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
+});
 
-try {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    }),
-  });
+// --- Fallback chain: try best model first ---
+const modelsToTry = (model || DEFAULT_MODEL) ? [model || DEFAULT_MODEL] : MODEL_CHAIN;
+let apiData = null;
+let usedModel = '';
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`API Error (${response.status}):`);
+for (const modelName of modelsToTry) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+  const timeout = modelName.includes('pro') ? 90_000 : 60_000;
+  console.log(`Tentando ${modelName} (timeout ${timeout / 1000}s)...`);
 
-    try {
-      const errorJson = JSON.parse(errorText);
-      console.error(JSON.stringify(errorJson, null, 2));
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: requestBody,
+      signal: AbortSignal.timeout(timeout),
+    });
 
-      if (response.status === 400 && errorText.includes('not found')) {
-        console.error(`\nModelo "${model}" nao encontrado.`);
-        console.error('Tente: --model gemini-2.5-flash-preview-image-generation');
-      }
-    } catch {
-      console.error(errorText);
+    if (response.status === 503) {
+      console.log(`  ${modelName}: 503 (alta demanda), tentando proximo...`);
+      continue;
     }
 
-    process.exit(1);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log(`  ${modelName}: HTTP ${response.status}, tentando proximo...`);
+      continue;
+    }
+
+    const data = await response.json();
+    if (data.candidates?.[0]?.content?.parts) {
+      apiData = data;
+      usedModel = modelName;
+      break;
+    }
+    console.log(`  ${modelName}: resposta sem conteudo, tentando proximo...`);
+  } catch (e) {
+    const reason = e.name === 'TimeoutError' ? 'timeout' : e.message;
+    console.log(`  ${modelName}: ${reason}, tentando proximo...`);
+    continue;
   }
+}
 
-  const data = await response.json();
+if (!apiData) {
+  console.error('ERRO: Nenhum modelo Gemini conseguiu gerar imagem.');
+  console.error(`Modelos tentados: ${modelsToTry.join(', ')}`);
+  process.exit(1);
+}
 
-  if (!data.candidates?.[0]?.content?.parts) {
-    console.error('Resposta inesperada da API:');
-    console.error(JSON.stringify(data, null, 2));
-    process.exit(1);
-  }
+console.log(`Modelo usado: ${usedModel}`);
 
+try {
   // --- Extract images and text ---
   let imageCount = 0;
   let textResponse = '';
 
-  for (const part of data.candidates[0].content.parts) {
+  for (const part of apiData.candidates[0].content.parts) {
     if (part.inlineData) {
       const buffer = Buffer.from(part.inlineData.data, 'base64');
       const mimeType = part.inlineData.mimeType || 'image/png';
@@ -187,7 +208,7 @@ try {
 
   if (imageCount === 0) {
     console.error('Nenhuma imagem gerada. Resposta completa:');
-    console.error(JSON.stringify(data, null, 2));
+    console.error(JSON.stringify(apiData, null, 2));
     process.exit(1);
   }
 

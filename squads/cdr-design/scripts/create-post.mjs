@@ -18,13 +18,14 @@
  */
 
 import sharp from 'sharp';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, readdirSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, '..', 'output');
-const DEFAULT_REF = join(__dirname, '..', 'data', 'style-ref', 'ivan-approved-style.png');
+const STYLE_REF_DIR = join(__dirname, '..', 'data', 'style-ref');
+const DEFAULT_REF = join(STYLE_REF_DIR, 'ref-01-perdendo-dinheiro.png');
 const EMOJI_DIR = join(__dirname, '..', 'assets', 'emojis');
 const EMOJI_MAP_PATH = join(EMOJI_DIR, 'emoji-map.json');
 
@@ -45,7 +46,13 @@ try {
 } catch {}
 
 const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = process.env.GEMINI_MODEL || 'gemini-3-pro-image-preview';
+const MODEL_OVERRIDE = process.env.GEMINI_MODEL || '';
+const MODEL_CHAIN = [
+  'gemini-3-pro-image-preview',
+  'gemini-3.1-flash-image-preview',
+  'gemini-2.5-flash-image',
+];
+const MAX_RETRIES = 2; // retry generation if first attempt has issues
 
 // --- Parse args ---
 const args = process.argv.slice(2);
@@ -157,15 +164,17 @@ const lineDescriptions = lines.map((l, i) => `  Line ${i + 1}: ${l}`).join('\n')
 const userWords = lines.flatMap(l => l.replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/).filter(Boolean));
 const allowedWordsList = [...new Set(userWords)].join(', ');
 
-const styleBlock = `STYLE TO COPY EXACTLY:
+const styleBlock = `STYLE TO COPY EXACTLY FROM THE REFERENCE IMAGES — THIS IS NON-NEGOTIABLE:
 - CONDENSED angular bold font (Impact/Dharma Gothic style — tall, narrow, sharp corners, NOT rounded or bubbly)
-- THICK dark green outline/stroke (4-6px) around every letter
+- EXTREMELY THICK dark green outline/stroke (6-8px MINIMUM) around every single letter — this outline must be VERY visible and CHUNKY
 - Warm cream/off-white text fill color
-- Deep SOLID BLACK block shadow behind each letter, offset 8-10px to bottom-right (hard edges, no blur)
+- MASSIVE deep SOLID BLACK block shadow behind each letter, offset 10-14px to bottom-right (hard edges, ZERO blur, very prominent)
+- The text must look like it has REAL 3D DEPTH — as if the letters are thick slabs casting heavy shadows
 - Dark moody green gradient background (smooth flow from near-black top-left to bright lime bottom-right)
 - Heavy vintage film grain texture across entire image
 - Strong dark vignette on corners (especially top-left)
-- Rounded card frame with dark border, pure black outside`;
+- Rounded card frame with dark border, pure black outside
+- THE TEXT MUST BE ENORMOUS — filling at LEAST 80% of the card height. Letters should be GIGANTIC, edge-to-edge`;
 
 const emojiBlock = detectedEmojis.length > 0 ? `
 
@@ -220,10 +229,16 @@ The reference image contains text that is NOT your target. ANY word visible in t
 ALLOWED WORDS (the ONLY words that may appear as main text): ${allowedWordsList}
 ALLOWED LAYOUT ELEMENTS (small, fixed): @cdrgroup.assessoria, C (in circle), CONTEÚDO AO LADO (with arrow)
 Everything else visible in the reference is FORBIDDEN. If your output contains ANY word not listed above, the image is WRONG.${emojiBlock}${logoBlock}`
-  : `Look at this reference image. Copy ONLY the visual style (font, colors, shadows, gradient, grain, layout). The text in the reference image is IRRELEVANT — COMPLETELY IGNORE any words/letters visible in the reference. Generate ONLY the text I specify below. If the image you generate contains ANY word not listed below, it is WRONG.
+  : `I am providing multiple reference images showing the EXACT visual style you must copy. Study ALL reference images carefully — they show the same style from different examples. Copy ONLY the visual style (font, colors, shadows, gradient, grain, layout). The text in the reference images is IRRELEVANT — COMPLETELY IGNORE any words/letters visible in the references. Generate ONLY the text I specify below. If the image you generate contains ANY word not listed below, it is WRONG.
 
 ${styleBlock}
-- Text fills 80-85% of the card height vertically
+
+CRITICAL SIZE RULE — THE TEXT MUST BE GIGANTIC:
+- The text block MUST fill 80-85% of the card HEIGHT — look at the reference images, the letters are ENORMOUS
+- Each line MUST fill 95% of the card WIDTH — edge to edge, with only tiny margins
+- The font size must be MASSIVE — as large as physically possible while fitting all lines
+- DO NOT leave large empty areas above or below the text — the text dominates the entire card
+- Look at the reference images: the text takes up almost the ENTIRE card surface
 
 TEXT — EXACTLY ${lines.length} lines, each fills 95% of card width:
 ${lineDescriptions}
@@ -323,14 +338,30 @@ async function main() {
   // Step 1: Call Gemini API
   console.log('[1/3] Gerando imagem com Gemini...');
 
-  const imgBuffer = readFileSync(refImage);
-  const ext = extname(refImage).toLowerCase();
   const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
-  const mimeType = mimeMap[ext] || 'image/png';
+  const parts = [];
 
-  const parts = [
-    { inlineData: { mimeType, data: imgBuffer.toString('base64') } },
-  ];
+  // Load ALL reference images from style-ref directory (multiple refs = better style adherence)
+  if (!customRef && existsSync(STYLE_REF_DIR)) {
+    const refFiles = readdirSync(STYLE_REF_DIR)
+      .filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f))
+      .sort();
+    let refCount = 0;
+    for (const file of refFiles) {
+      const filePath = join(STYLE_REF_DIR, file);
+      const buf = readFileSync(filePath);
+      const ext = extname(file).toLowerCase();
+      parts.push({ inlineData: { mimeType: mimeMap[ext] || 'image/png', data: buf.toString('base64') } });
+      refCount++;
+    }
+    console.log(`   ${refCount} referencia(s) de estilo carregadas`);
+  } else {
+    // Custom ref or fallback to single image
+    const imgBuffer = readFileSync(refImage);
+    const ext = extname(refImage).toLowerCase();
+    parts.push({ inlineData: { mimeType: mimeMap[ext] || 'image/png', data: imgBuffer.toString('base64') } });
+    console.log(`   Referencia: ${refImage}`);
+  }
 
   // Add logo reference image
   if (logoPath && existsSync(logoPath)) {
@@ -352,38 +383,72 @@ async function main() {
 
   parts.push({ text: prompt });
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts }],
-      generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
-    }),
+  const requestBody = JSON.stringify({
+    contents: [{ parts }],
+    generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
   });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error(`ERRO Gemini API (${response.status}):`, errText.slice(0, 200));
-    process.exit(1);
+  // --- Generate with fallback chain + retry loop ---
+  async function generateWithFallback(attempt) {
+    const modelsToTry = MODEL_OVERRIDE ? [MODEL_OVERRIDE] : MODEL_CHAIN;
+    for (const modelName of modelsToTry) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+      const timeout = modelName.includes('pro') ? 90_000 : 60_000;
+      console.log(`   Tentando ${modelName} (timeout ${timeout / 1000}s)...`);
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: requestBody,
+          signal: AbortSignal.timeout(timeout),
+        });
+
+        if (response.status === 503) {
+          console.log(`   ${modelName}: 503 (alta demanda), tentando proximo...`);
+          continue;
+        }
+
+        if (!response.ok) {
+          console.log(`   ${modelName}: HTTP ${response.status}, tentando proximo...`);
+          continue;
+        }
+
+        const data = await response.json();
+        for (const part of (data.candidates?.[0]?.content?.parts || [])) {
+          if (part.inlineData) {
+            return { buffer: Buffer.from(part.inlineData.data, 'base64'), model: modelName };
+          }
+        }
+        console.log(`   ${modelName}: resposta sem imagem, tentando proximo...`);
+      } catch (e) {
+        const reason = e.name === 'TimeoutError' ? 'timeout' : e.message;
+        console.log(`   ${modelName}: ${reason}, tentando proximo...`);
+        continue;
+      }
+    }
+    return null;
   }
 
-  const data = await response.json();
   let rawImageBuffer = null;
+  let usedModel = '';
 
-  for (const part of (data.candidates?.[0]?.content?.parts || [])) {
-    if (part.inlineData) {
-      rawImageBuffer = Buffer.from(part.inlineData.data, 'base64');
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 1) console.log(`   Retry ${attempt}/${MAX_RETRIES}...`);
+    const result = await generateWithFallback(attempt);
+    if (result) {
+      rawImageBuffer = result.buffer;
+      usedModel = result.model;
       break;
     }
   }
 
   if (!rawImageBuffer) {
-    console.error('ERRO: Gemini nao retornou imagem.');
+    console.error('ERRO: Nenhum modelo Gemini conseguiu gerar imagem apos ' + MAX_RETRIES + ' tentativas.');
+    console.error(`Modelos tentados: ${MODEL_OVERRIDE || MODEL_CHAIN.join(', ')}`);
     process.exit(1);
   }
-  console.log('   OK!');
+  console.log(`   OK! (modelo: ${usedModel})`);
 
   // Step 2: Apply grain
   let processedBuffer;
