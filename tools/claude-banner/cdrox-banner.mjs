@@ -1,0 +1,13 @@
+// CDROX Banner — Verde limao #A8D600
+const g = '\x1b[38;2;168;214;0m';
+const d = '\x1b[38;2;100;128;0m';
+const r = '\x1b[0m';
+console.log('');
+console.log(`${g} ██████╗██████╗ ██████╗  ██████╗ ██╗  ██╗${r}`);
+console.log(`${g}██╔════╝██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝${r}`);
+console.log(`${g}██║     ██║  ██║██████╔╝██║   ██║ ╚███╔╝ ${r}`);
+console.log(`${g}██║     ██║  ██║██╔══██╗██║   ██║ ██╔██╗ ${r}`);
+console.log(`${g}╚██████╗██████╔╝██║  ██║╚██████╔╝██╔╝ ██╗${r}`);
+console.log(`${g} ╚═════╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝${r}`);
+console.log(`${d}         Powered by Synkra AIOX${r}`);
+console.log('');
